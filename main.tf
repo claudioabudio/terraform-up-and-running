@@ -60,6 +60,8 @@ resource "aws_autoscaling_group" "example_asg" {
   max_size = 10
 
   vpc_zone_identifier = data.aws_subnets.default_subnets.ids
+  target_group_arns   = [aws_lb_target_group.example_tg.arn]
+  health_check_type   = "ELB"
 
   tag {
     key                 = "Name"
