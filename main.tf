@@ -5,6 +5,16 @@ provider "aws" {
 }
 
 
+data "terraform_remote_state" "db" {
+  backend = "s3"
+
+  config = {
+    bucket = "claudioabud-terraform-state"
+    key    = "data-stores/mysql/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+
 resource "aws_security_group" "example_instance_sg" {
   name = "terraform-example-instance"
 
@@ -24,11 +34,11 @@ resource "aws_launch_configuration" "example_lc" {
   instance_type   = "t2.micro"
   security_groups = [aws_security_group.example_instance_sg.id]
 
-  user_data = <<-EOF
-              #!/bin/bash
-              echo "Hello, World" > index.html
-              nohup busybox httpd -f -p ${var.server_port} &
-              EOF
+  user_data = templatefile("user-data.sh", {
+    db_address  = data.terraform_remote_state.db.outputs.address
+    db_port     = data.terraform_remote_state.db.outputs.port
+    server_port = var.server_port
+  })
 
   lifecycle {
     create_before_destroy = true
