@@ -1,7 +1,9 @@
-
-
-provider "aws" {
-  region = "us-east-1"
+locals {
+  http_port    = 80
+  any_port     = 0
+  any_protocol = "-1"
+  tcp_protocol = "tcp"
+  all_ips      = ["0.0.0.0/0"]
 }
 
 
@@ -9,20 +11,20 @@ data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    bucket = "claudioabud-terraform-state"
-    key    = "data-stores/mysql/terraform.tfstate"
+    bucket = var.db_remote_state_bucket
+    key    = var.db_remote_state_key
     region = "us-east-1"
   }
 }
 
 resource "aws_security_group" "example_instance_sg" {
-  name = "terraform-example-instance"
+  name = "${var.cluster_name}-inst-sg"
 
   ingress {
     from_port   = var.server_port
     to_port     = var.server_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    protocol    = local.tcp_protocol
+    cidr_blocks = local.all_ips
   }
 }
 
@@ -31,10 +33,10 @@ resource "aws_security_group" "example_instance_sg" {
 
 resource "aws_launch_configuration" "example_lc" {
   image_id        = "ami-0261755bbcb8c4a84"
-  instance_type   = "t2.micro"
+  instance_type   = var.instance_type
   security_groups = [aws_security_group.example_instance_sg.id]
 
-  user_data = templatefile("user-data.sh", {
+  user_data = templatefile("${path.module}/user-data.sh", {
     db_address  = data.terraform_remote_state.db.outputs.address
     db_port     = data.terraform_remote_state.db.outputs.port
     server_port = var.server_port
@@ -48,8 +50,8 @@ resource "aws_launch_configuration" "example_lc" {
 resource "aws_autoscaling_group" "example_asg" {
   launch_configuration = aws_launch_configuration.example_lc.name
 
-  min_size = 2
-  max_size = 10
+  min_size = var.min_size
+  max_size = var.max_size
 
   vpc_zone_identifier = data.aws_subnets.default_subnets.ids
   target_group_arns   = [aws_lb_target_group.example_tg.arn]
@@ -57,7 +59,7 @@ resource "aws_autoscaling_group" "example_asg" {
 
   tag {
     key                 = "Name"
-    value               = "terraform-asg-example"
+    value               = "${var.cluster_name}-asg"
     propagate_at_launch = true
   }
 }
