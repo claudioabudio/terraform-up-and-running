@@ -62,4 +62,14 @@ resource "aws_autoscaling_group" "example_asg" {
     value               = "${var.cluster_name}-asg"
     propagate_at_launch = true
   }
+
+  dynamic "tag" {
+    for_each = var.custom_tags
+    iterator = custom_tag
+    content {
+        key = custom_tag.key
+        value = custom_tag.value
+        propagate_at_launch = true
+    }
+  }
 }
