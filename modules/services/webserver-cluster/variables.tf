@@ -22,23 +22,29 @@ variable "db_remote_state_key" {
 variable "instance_type" {
   description = "The type of EC2 Instances to run (e.g. t2.micro)"
   type        = string
-  default = "t2.micro"
+  default     = "t2.micro"
 }
 
 variable "min_size" {
   description = "The minimum number of EC2 Instances in the ASG"
   type        = number
-  default = 2
+  default     = 2
 }
 
 variable "max_size" {
   description = "The maximum number of EC2 Instances in the ASG"
   type        = number
-  default = 2
+  default     = 2
 }
 
 variable "custom_tags" {
   description = "Custom tags to set on the Instances in the ASG"
   type        = map(string)
   default     = {}
+}
+
+variable "enable_autoscaling" {
+  description = "If set to true, enable auto scaling"
+  type        = bool
+  default     = false
 }
