@@ -3,8 +3,9 @@ provider "aws" {
 }
 
 module "web-server" {
-  source = "../../../modules/services/webserver-cluster"
+  source                 = "../../../modules/services/webserver-cluster"
   db_remote_state_bucket = "claudioabud-terraform-state"
-  db_remote_state_key = "stage/data-stores/mysql/terraform.tfstate"
-  cluster_name = "webservers-stage"
+  db_remote_state_key    = "stage/data-stores/mysql/terraform.tfstate"
+  cluster_name           = "webservers-stage"
+  server_text            = "New Server text"
 }
