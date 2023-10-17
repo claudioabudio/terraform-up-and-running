@@ -49,19 +49,22 @@ resource "aws_launch_configuration" "example_lc" {
 }
 
 resource "aws_autoscaling_group" "example_asg" {
-  name = "${var.cluster_name}-${aws_launch_configuration.example_lc.name}"
+  name = var.cluster_name
   launch_configuration = aws_launch_configuration.example_lc.name
 
   min_size = var.min_size
   max_size = var.max_size
-  min_elb_capacity = var.min_size
 
   vpc_zone_identifier = data.aws_subnets.default_subnets.ids
   target_group_arns   = [aws_lb_target_group.example_tg.arn]
   health_check_type   = "ELB"
 
-  lifecycle {
-    create_before_destroy = true
+ # Use instance refresh to roll out changes to the ASG
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 50
+    }
   }
 
   tag {

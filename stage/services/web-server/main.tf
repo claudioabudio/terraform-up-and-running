@@ -7,5 +7,5 @@ module "web-server" {
   db_remote_state_bucket = "claudioabud-terraform-state"
   db_remote_state_key    = "stage/data-stores/mysql/terraform.tfstate"
   cluster_name           = "webservers-stage"
-  server_text            = "New Server text"
+  server_text            = "Back to the old server !"
 }
