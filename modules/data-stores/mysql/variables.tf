@@ -8,14 +8,14 @@ variable "db_username" {
   type        = string
   description = "master user for mysql rds db"
   sensitive   = true
-  default = null
+  default     = null
 }
 
 variable "db_password" {
   type        = string
   description = "master password for mysql rds db"
   sensitive   = true
-  default = null
+  default     = null
 }
 
 variable "backup_retention_period" {
