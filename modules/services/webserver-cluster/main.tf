@@ -45,11 +45,15 @@ resource "aws_launch_configuration" "example_lc" {
 
   lifecycle {
     create_before_destroy = true
+    precondition {
+      condition     = data.aws_ec2_instance_type.instance_type_features.free_tier_eligible
+      error_message = "The instance type ${var.instance_type} is not free tier eligible"
+    }
   }
 }
 
 resource "aws_autoscaling_group" "example_asg" {
-  name = var.cluster_name
+  name                 = var.cluster_name
   launch_configuration = aws_launch_configuration.example_lc.name
 
   min_size = var.min_size
@@ -59,7 +63,7 @@ resource "aws_autoscaling_group" "example_asg" {
   target_group_arns   = [aws_lb_target_group.example_tg.arn]
   health_check_type   = "ELB"
 
- # Use instance refresh to roll out changes to the ASG
+  # Use instance refresh to roll out changes to the ASG
   instance_refresh {
     strategy = "Rolling"
     preferences {

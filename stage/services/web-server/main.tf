@@ -29,4 +29,5 @@ module "web-server" {
   cluster_name           = "webservers-stage"
   server_text            = "Back to the old server !"
   ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.instance_type
 }
